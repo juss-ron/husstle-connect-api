@@ -5,6 +5,29 @@ const { User } = require('../models/Relationships');
 
 const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
+const MASTER_KEY = process.env.MASTER_KEY || "";
+
+// Get all users 
+router.get('/all', async (req, res) => {
+  const adminKey = req.headers['adminkey'];
+
+  if (!adminKey)
+    return res.status(401).json({ error: 'Missing credentials' });
+
+  if (MASTER_KEY !== adminKey)
+    return res.status(403).json({ error: 'Not authorised to access this information' });
+
+  try {
+    const users = await User.findAll({
+      attributes: { exclude: ['password'] }
+    });
+
+    return res.status(200).json(users);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Something went wrong in the server' });
+  }
+});
 
 // Register a new user
 router.post('/register', async (req, res) => {
@@ -48,6 +71,38 @@ router.post('/login', async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: 'Something went wrong in the server' });
     console.log(err)
+  }
+});
+
+// Delete an existing account
+router.delete('/delete', async (req, res) => {
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+
+  const { email, password } = req.body;
+  if (!token || !email || !password)
+    return res.status(401).json({ error: 'Missing credentials' });
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ error: 'Wrong credentials' });
+
+    if (decoded.id !== user.id) {
+      return res.status(403).json({ error: 'You can only delete your own account' });
+    }
+
+    const match = await bcrypt.compare(password, user.password);
+    if (!match) return res.status(401).json({ error: 'Wrong credentials' });
+
+    await user.destroy();
+
+    res.status(200).json({ message: 'Account deleted successfully' });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ error: 'Something went wrong in the server' });
   }
 });
 

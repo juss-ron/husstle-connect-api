@@ -1,7 +1,7 @@
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { User } = require('../models/User');
+const { User } = require('../models/Relationships');
 
 const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
@@ -17,7 +17,7 @@ router.post('/register', async (req, res) => {
     if (existing)
       return res.status(400).json({ error: 'You already have an account, please sign in' });
 
-    const hashed = bcrypt.hash(password, 10);
+    const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashed });
     const token = jwt.sign({ id: user.id, name: user.name }, SECRET_KEY, { expiresIn: '1h' });
 
@@ -28,7 +28,8 @@ router.post('/register', async (req, res) => {
   }
 });
 
-router.post('/login', async (res, req) => {
+// Login an existing user
+router.post('/login', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password)
     return res.status(400).json({ error: 'Email and password are required fields' });
@@ -38,7 +39,7 @@ router.post('/login', async (res, req) => {
     if (!user)
       return res.status(400).json({ error: 'Wrong email or pasword' });
 
-    const match = bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password);
     if (!match)
       return res.status(400).json({ error: 'Wrong email or password' });
 

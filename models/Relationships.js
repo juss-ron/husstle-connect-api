@@ -13,7 +13,7 @@ Job.belongsTo(Category, {
   foreignKey: 'categoryTitle'
 });
 
-//// A job has many applicants and a user can apply to many jobs
+// A job has many applicants and a user can apply to many jobs
 Job.belongsToMany(User, {
   through: 'UserJobs',
   as: 'applicants',
@@ -27,5 +27,17 @@ User.belongsToMany(Job, {
   foreignKey: 'userId',
   otherKey: 'jobId'
 });
+
+// A user can creates jobs
+User.hasMany(Job, {
+  as: 'createdJobs',
+  foreignKey: 'creatorId',
+  onDelete: 'CASCADE'
+});
+
+Job.belongsTo(User, {
+  as: 'creator',
+  foreignKey: 'creatorId'
+})
 
 module.exports = { User, Job, Category };

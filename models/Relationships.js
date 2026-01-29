@@ -1,25 +1,31 @@
-const User = require('User.js');
-const Job = require('Job.js');
-const Category = require('Category.js');
+const User = require('./User');
+const Job = require('./Job');
+const Category = require('./Category');
 
+// A category has many jobs and a job belongs to one category
 Category.hasMany(Job, {
   as: 'jobs',
-  foreignKey: 'category'
+  foreignKey: 'categoryTitle'
 });
 
 Job.belongsTo(Category, {
-  as: category,
-  foreignKey: 'category'
+  as: 'associatedCategory',
+  foreignKey: 'categoryTitle'
 });
 
-Job.hasMany(User, {
+//// A job has many applicants and a user can apply to many jobs
+Job.belongsToMany(User, {
+  through: 'UserJobs',
   as: 'applicants',
-  foreignKey: 'userId'
+  foreignKey: 'jobId',
+  otherKey: 'userId'
 });
 
-User.belongsTo(Job, {
-  as: 'job-prospects',
-  foreignKey: 'userid'
+User.belongsToMany(Job, {
+  through: 'UserJobs',
+  as: 'jobProspects',
+  foreignKey: 'userId',
+  otherKey: 'jobId'
 });
 
 module.exports = { User, Job, Category };

@@ -1,7 +1,7 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../database');
 
-const Job = new sequelize.define('Job', {
+const Job = sequelize.define('Job', {
   id: {
     type: DataTypes.UUID,
     defaultValue: DataTypes.UIDV4,
@@ -17,7 +17,7 @@ const Job = new sequelize.define('Job', {
     allowNull: false
   },
   price: {
-    type: DataTypes.INTERGER,
+    type: DataTypes.INTEGER,
     allowNull: false
   },
   category: {

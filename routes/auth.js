@@ -5,7 +5,7 @@ const { User } = require('../models/Relationships');
 
 const router = express.Router();
 const SECRET_KEY = process.env.SECRET_KEY;
-const MASTER_KEY = process.env.MASTER_KEY || "";
+const MASTER_KEY = process.env.MASTER_KEY;
 
 // Get all users 
 router.get('/all', async (req, res) => {
@@ -25,7 +25,7 @@ router.get('/all', async (req, res) => {
     return res.status(200).json(users);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: 'Something went wrong in the server' });
+    res.status(500).json({ error: 'There was an internal server error' });
   }
 });
 
@@ -46,7 +46,7 @@ router.post('/register', async (req, res) => {
 
     res.status(201).json({ message: 'Account created successfully', token });
   } catch (err) {
-    res.status(500).json({ error: 'Something went wrong in the server' });
+    res.status(500).json({ error: 'There was an internal server error' });
     console.log(err);
   }
 });
@@ -69,7 +69,7 @@ router.post('/login', async (req, res) => {
     const token = jwt.sign({ id: user.id, name: user.name }, SECRET_KEY, { expiresIn: '1h' });
     res.status(202).json({ message: 'Login was successful', token });
   } catch (err) {
-    res.status(500).json({ error: 'Something went wrong in the server' });
+    res.status(500).json({ error: 'There was an internal server error' });
     console.log(err)
   }
 });
@@ -81,28 +81,34 @@ router.delete('/delete', async (req, res) => {
 
   const { email, password } = req.body;
   if (!token || !email || !password)
-    return res.status(401).json({ error: 'Missing credentials' });
+    return res.status(401).json({ error: 'Missing credentials.' });
 
   try {
     const decoded = jwt.verify(token, SECRET_KEY);
 
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ error: 'Wrong credentials' });
+    if (!user) return res.status(404).json({ error: 'Wrong credentials.' });
 
     if (decoded.id !== user.id) {
-      return res.status(403).json({ error: 'You can only delete your own account' });
+      return res.status(403).json({ error: 'You can only delete your own account.' });
     }
 
     const match = await bcrypt.compare(password, user.password);
-    if (!match) return res.status(401).json({ error: 'Wrong credentials' });
+    if (!match) return res.status(401).json({ error: 'Wrong credentials.' });
 
     await user.destroy();
 
-    res.status(200).json({ message: 'Account deleted successfully' });
+    res.status(200).json({ message: 'Account deleted successfully.' });
 
   } catch (err) {
+    if (err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Please log in again.' });
+    }
+    if (err.name === 'JsonWebTokenError') {
+      return res.status(401).json({ error: 'Not authorised to proceed.' });
+    }
     console.log(err);
-    res.status(500).json({ error: 'Something went wrong in the server' });
+    res.status(500).json({ error: 'There was an internal server error.' });
   }
 });
 

@@ -3,6 +3,7 @@ const express = require('express');
 const sequelize = require('./database');
 const authRoutes = require('./routes/auth');
 const categoryRoutes = require('./routes/category')
+const jobRoutes = require('./routes/jobs')
 const port = 3000
 
 const app = express();
@@ -10,6 +11,7 @@ app.use(express.json());
 
 app.use('/auth', authRoutes);
 app.use('/categories', categoryRoutes);
+app.use('/jobs', jobRoutes);
 
 sequelize.sync().then(() => {
   console.log('Databased synced');

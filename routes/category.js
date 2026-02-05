@@ -59,8 +59,6 @@ router.patch('/:id', async (req, res) => {
     return res.status(400).json({ error: 'Title or image name are required' });
 
   const id = req.params.id;
-  if (!id)
-    return res.status(400).json({ error: 'Please specify the category to edit' });
 
   try {
     const category = await Category.findOne({ where: { id } });
@@ -92,8 +90,6 @@ router.delete('/:id', async (req, res) => {
     return res.status(400).json({ error: 'You are not authorised to delete a category' });
 
   const id = req.params.id;
-  if (!id)
-    return res.status(400).json({ error: 'Please specify the category to delete' });
 
   try {
     const category = await Category.findOne({ where: { id } });

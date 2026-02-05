@@ -5,12 +5,12 @@ const Category = require('./Category');
 // A category has many jobs and a job belongs to one category
 Category.hasMany(Job, {
   as: 'jobs',
-  foreignKey: 'categoryTitle'
+  foreignKey: 'categoryId'
 });
 
 Job.belongsTo(Category, {
   as: 'associatedCategory',
-  foreignKey: 'categoryTitle'
+  foreignKey: 'categoryId'
 });
 
 // A job has many applicants and a user can apply to many jobs

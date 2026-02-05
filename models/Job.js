@@ -20,10 +20,6 @@ const Job = sequelize.define('Job', {
     type: DataTypes.INTEGER,
     allowNull: false
   },
-  category: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
   status: {
     type: DataTypes.STRING,
     allowNull: false

@@ -10,3 +10,6 @@ database.db
 # Requests
 requests
 
+# DS Store
+.DS_Store
+

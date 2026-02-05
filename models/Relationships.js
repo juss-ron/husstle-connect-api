@@ -28,7 +28,7 @@ User.belongsToMany(Job, {
   otherKey: 'jobId'
 });
 
-// A user can creates jobs
+// A user can creates jobs and a job is created by a user
 User.hasMany(Job, {
   as: 'createdJobs',
   foreignKey: 'creatorId',
@@ -38,6 +38,17 @@ User.hasMany(Job, {
 Job.belongsTo(User, {
   as: 'creator',
   foreignKey: 'creatorId'
-})
+});
+
+// A job can have a user assigned to it and a user can be asigned to multiple jobs
+User.hasMany(Job, {
+  as: 'assignedJobs',
+  foreignKey: 'assigneeId'
+});
+
+Job.belongsTo(User, {
+  as: 'assignedUser',
+  foreignKey: 'assigneeId'
+});
 
 module.exports = { User, Job, Category };
